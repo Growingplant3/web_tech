@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  </head>
+
+  <body>
+    <% require 'pg' %>
+    <% connection = PG::connect(dbname: "goya") %>
+    <% connection.internal_encoding = "UTF-8" %>
+    <% result_a = connection.exec("select give_for from crops where give_for != '自家消費';") %>
+    <% data_a = [] %>
+
+    <% result_a.each do |record| %>
+      <% data_a << "ゴーヤの譲渡先：#{record["give_for"]}" %>
+    <% end %>
+
+    <form action="self_consumption.cgi" method="POST">
+      <p>ボタンを押すと、譲渡先が自家消費ではないもののgoyaの情報を載せたページが表示されます</p>
+      <input type="text" name="selected_goya" value="<%= data_a.join(' ') %>" >
+      <input type="submit" name="送信" >
+    </form>
+
+    <% result_b = connection.exec("select quality from crops where quality = false;") %>
+    <% data_b = [] %>
+
+    <% result_b.each do |record| %>
+      <% data_b << "ゴーヤの品質：#{record["quality"]}" %>
+    <% end %>
+
+    <form action="bad_quality.cgi" method="POST">
+    <p>ボタンを押すと、品質が悪いもの（false）のgoyaの情報を載せたページが表示される</p>
+    <input type="text" name="selected_goya" value="<%= data_b.join(' ') %>">
+    <input type="submit" name="送信" >
+  </form>
+  </body>
+</html>
